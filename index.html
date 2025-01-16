@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenzo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #f9f9f9;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #a71d2a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Expenzo</h1>
+    </header>
+    <div class="container" id="app">
+        <div id="register-section">
+            <h1>Register</h1>
+            <form id="register-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+
+                <button type="submit">Register</button>
+            </form>
+        </div>
+
+        <div id="expense-section" style="display: none;">
+            <h1>Welcome, <span id="user-name"></span>!</h1>
+            <button id="logout">Logout</button>
+
+            <h2>Expense Calculator</h2>
+            <form id="expense-form">
+                <label for="description">Description:</label>
+                <input type="text" id="description" required>
+
+                <label for="amount">Amount:</label>
+                <input type="number" step="0.01" id="amount" required>
+
+                <label for="category">Category:</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Food">Food</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <button type="submit">Add Expense</button>
+            </form>
+
+            <h3>Expenses</h3>
+            <ul id="expense-list"></ul>
+            <p>Total: ₹<span id="total-amount">0.00</span></p>
+        </div>
+    </div>
+
+    <script>
+        const registerSection = document.getElementById('register-section');
+        const expenseSection = document.getElementById('expense-section');
+        const registerForm = document.getElementById('register-form');
+        const expenseForm = document.getElementById('expense-form');
+        const expenseList = document.getElementById('expense-list');
+        const totalAmount = document.getElementById('total-amount');
+        const userNameSpan = document.getElementById('user-name');
+        const logoutButton = document.getElementById('logout');
+
+        let expenses = [];
+        let total = 0;
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+
+            if (username.trim()) {
+                localStorage.setItem('user', username);
+                showExpenseSection(username);
+            }
+        });
+
+        expenseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+
+            if (description.trim() && amount > 0 && category) {
+                const expense = { description, amount, category };
+                expenses.push(expense);
+                total += amount;
+                updateExpenseList();
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('user');
+            showRegisterSection();
+        });
+
+        function updateExpenseList() {
+            expenseList.innerHTML = '';
+            expenses.forEach((expense, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${expense.description} - ₹${expense.amount.toFixed(2)} (${expense.category})
+                    <button class="delete-btn" onclick="deleteExpense(${index})">Delete</button>
+                `;
+                expenseList.appendChild(li);
+            });
+            totalAmount.textContent = total.toFixed(2);
+        }
+
+        function deleteExpense(index) {
+            total -= expenses[index].amount;
+            expenses.splice(index, 1);
+            updateExpenseList();
+        }
+
+        function showExpenseSection(username) {
+            registerSection.style.display = 'none';
+            expenseSection.style.display = 'block';
+            userNameSpan.textContent = username;
+        }
+
+        function showRegisterSection() {
+            registerSection.style.display = 'block';
+            expenseSection.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('user');
+            if (user) {
+                showExpenseSection(user);
+            } else {
+                showRegisterSection();
+            }
+        });
+    </script>
+</body>
+</html>
