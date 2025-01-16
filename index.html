@@ -69,7 +69,9 @@
             background-color: #dc3545;
             color: white;
             border: none;
-            padding: 0.4rem 0.8rem;
+            padding: 0.2rem 0.6rem; /* Reduced padding */
+            font-size: 0.9rem; /* Smaller font size */
+            border-radius: 4px; /* Rounded corners */
             cursor: pointer;
         }
         .delete-btn:hover {
@@ -138,6 +140,7 @@
         let expenses = [];
         let total = 0;
 
+        // Register form submission
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
@@ -148,25 +151,37 @@
             }
         });
 
+        // Expense form submission
         expenseForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const description = document.getElementById('description').value;
-            const amount = parseFloat(document.getElementById('amount').value);
-            const category = document.getElementById('category').value;
+            const description = document.getElementById('description');
+            const amount = document.getElementById('amount');
+            const category = document.getElementById('category');
 
-            if (description.trim() && amount > 0 && category) {
-                const expense = { description, amount, category };
+            const descriptionValue = description.value.trim();
+            const amountValue = parseFloat(amount.value);
+            const categoryValue = category.value;
+
+            if (descriptionValue && amountValue > 0 && categoryValue) {
+                const expense = { description: descriptionValue, amount: amountValue, category: categoryValue };
                 expenses.push(expense);
-                total += amount;
+                total += amountValue;
                 updateExpenseList();
+
+                // Clear input fields
+                description.value = '';
+                amount.value = '';
+                category.value = '';
             }
         });
 
+        // Logout button
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('user');
             showRegisterSection();
         });
 
+        // Update the expense list
         function updateExpenseList() {
             expenseList.innerHTML = '';
             expenses.forEach((expense, index) => {
@@ -180,23 +195,27 @@
             totalAmount.textContent = total.toFixed(2);
         }
 
+        // Delete an expense
         function deleteExpense(index) {
             total -= expenses[index].amount;
             expenses.splice(index, 1);
             updateExpenseList();
         }
 
+        // Show the expense section
         function showExpenseSection(username) {
             registerSection.style.display = 'none';
             expenseSection.style.display = 'block';
             userNameSpan.textContent = username;
         }
 
+        // Show the register section
         function showRegisterSection() {
             registerSection.style.display = 'block';
             expenseSection.style.display = 'none';
         }
 
+        // Check local storage on page load
         document.addEventListener('DOMContentLoaded', () => {
             const user = localStorage.getItem('user');
             if (user) {
